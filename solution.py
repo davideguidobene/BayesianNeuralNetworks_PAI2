@@ -363,15 +363,16 @@ class DropoutTrainer(Framework):
 
     def predict_probabilities(self, x: torch.Tensor, num_sample=20) -> torch.Tensor:
         assert x.shape[1] == 28 ** 2
-        self.network.eval()
 
         # TODO: MC_Dropout_3. Implement your MC_dropout prediction here
         # You need to sample from your trained model here multiple times
         # in order to implement Monte Carlo integration
 
-        t = torch.stack([F.softmax(self.network(x), dim=1) for _ in range(num_sample)])
+        with torch.no_grad():
 
-        estimated_probability = torch.mean(t, dim=0)
+            t = torch.stack([F.softmax(self.network(x), dim=1) for _ in range(num_sample)])
+
+            estimated_probability = torch.mean(t, dim=0)
 
         assert estimated_probability.shape == (x.shape[0], 10)  
         return torch.Tensor(estimated_probability)
